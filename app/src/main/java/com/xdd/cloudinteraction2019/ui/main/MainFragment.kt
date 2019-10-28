@@ -6,27 +6,32 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.xdd.cloudinteraction2019.R
+import androidx.appcompat.app.AppCompatActivity
+import com.xdd.cloudinteraction2019.databinding.MainFragmentBinding
 
-class MainFragment : Fragment() {
+class MainFragment private constructor() : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
     }
 
+    private lateinit var fragmentBinding: MainFragmentBinding
     private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        fragmentBinding = MainFragmentBinding.inflate(inflater, container, false)
+        return fragmentBinding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+        fragmentBinding.viewModel = viewModel
+
+        (context as? AppCompatActivity)?.setSupportActionBar(fragmentBinding.toolbar)
     }
 
 }
