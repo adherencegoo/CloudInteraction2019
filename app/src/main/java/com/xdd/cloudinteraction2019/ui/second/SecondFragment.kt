@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.xdd.cloudinteraction2019.data.model.Photo
 import com.xdd.cloudinteraction2019.databinding.SecondFragmentBinding
 
-class SecondFragment private constructor() : Fragment() {
+class SecondFragment : Fragment() {
     companion object {
         fun newInstance() = SecondFragment()
     }
@@ -25,6 +25,7 @@ class SecondFragment private constructor() : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         fragmentBinding = SecondFragmentBinding.inflate(inflater, container, false)
+        fragmentBinding.lifecycleOwner = this
 
         fragmentBinding.photoRecycler!!.apply {
             adapter = PhotoAdapter()
