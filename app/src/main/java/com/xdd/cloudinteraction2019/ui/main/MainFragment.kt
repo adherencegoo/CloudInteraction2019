@@ -23,6 +23,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         fragmentBinding = MainFragmentBinding.inflate(inflater, container, false)
+        fragmentBinding.lifecycleOwner = this
         return fragmentBinding.root
     }
 
