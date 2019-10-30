@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.collection.LruCache
 import androidx.lifecycle.MutableLiveData
+import com.xdd.cloudinteraction2019.data.LinkedBlockingLifo
 import okhttp3.*
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 object BitmapCache {
     private val memoryCache: LruCache<String, BitmapRequest> =
@@ -31,7 +33,7 @@ object BitmapCache {
         }
 
     private val httpClient = OkHttpClient.Builder().dispatcher(
-        Dispatcher(Executors.newFixedThreadPool(15))
+        Dispatcher(ThreadPoolExecutor(5, 10, 1, TimeUnit.MINUTES, LinkedBlockingLifo<Runnable>()))
     ).build()
 
     private val pendingRequests =
