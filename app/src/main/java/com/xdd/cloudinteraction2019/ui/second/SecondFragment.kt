@@ -27,10 +27,7 @@ class SecondFragment : Fragment() {
         fragmentBinding = SecondFragmentBinding.inflate(inflater, container, false)
         fragmentBinding.lifecycleOwner = this
 
-        fragmentBinding.photoRecycler!!.apply {
-            adapter = PhotoAdapter()
-            layoutManager = GridLayoutManager(context, 4)
-        }
+        fragmentBinding.photoRecycler.layoutManager = GridLayoutManager(context, 4)
 
         return fragmentBinding.root
     }
@@ -39,6 +36,8 @@ class SecondFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         val viewModel = ViewModelProviders.of(this).get(SecondViewModel::class.java)
+
+        fragmentBinding.photoRecycler.adapter = PhotoAdapter(viewModel)
 
         viewModel.livePhotos.observe(this, Observer<PagedList<Photo>> {
             (fragmentBinding.photoRecycler.adapter as PhotoAdapter).submitList(it)
