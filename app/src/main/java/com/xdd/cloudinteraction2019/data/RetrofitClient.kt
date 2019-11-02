@@ -1,5 +1,6 @@
 package com.xdd.cloudinteraction2019.data
 
+import com.xdd.cloudinteraction2019.data.model.Album
 import com.xdd.cloudinteraction2019.data.model.Photo
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -17,6 +18,12 @@ object RetrofitClient {
             @Query("albumId") albumId: Long? = null,
             @Query("id") photoId: Long? = null
         ): Call<List<Photo>>
+
+        @GET("/albums")
+        fun getAlbums(
+            @Query("albumId") albumId: Long? = null,
+            @Query("id") photoId: Long? = null
+        ): Call<List<Album>>
     }
 
     val api: Api = Retrofit.Builder()

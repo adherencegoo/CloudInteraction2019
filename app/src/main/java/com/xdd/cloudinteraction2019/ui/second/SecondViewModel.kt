@@ -13,7 +13,6 @@ import java.util.concurrent.Executors
 class SecondViewModel : ViewModel() {
     companion object {
         private val pagedListConfig = PagedList.Config.Builder()
-            .setEnablePlaceholders(true)
             .setInitialLoadSizeHint(10)
             .setPageSize(20)
             .setPrefetchDistance(8)
