@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.xdd.cloudinteraction2019.data.bitmapUtils.BitmapCache
-import com.xdd.cloudinteraction2019.data.bitmapUtils.BitmapRequest
 import com.xdd.cloudinteraction2019.data.model.Photo
 import com.xdd.cloudinteraction2019.databinding.PhotoCellBinding
 
@@ -32,7 +31,7 @@ class PhotoAdapter(private val viewModel: SecondViewModel) :
 
             val liveBitmap = viewModel.getLiveBitmapRequest(photo.url)
             holder.cellBinding.liveBitmap = liveBitmap
-            BitmapCache.requestBitmap(BitmapRequest(photo.thumbnailUrl), liveBitmap)
+            BitmapCache.requestBitmap(photo.thumbnailUrl, liveBitmap)
         }
     }
 }
