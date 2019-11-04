@@ -4,16 +4,21 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.collection.LruCache
 import androidx.lifecycle.MutableLiveData
-import com.xdd.cloudinteraction2019.data.LinkedBlockingLifo
 import okhttp3.*
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 object BitmapCache {
-    class PendingEntry {
-        val liveBitmaps = CopyOnWriteArraySet<MutableLiveData<Bitmap>>()
+    internal class PendingEntry {
+        internal var lastRequestedTime = 0L
+        internal val liveBitmaps = CopyOnWriteArraySet<MutableLiveData<Bitmap>>()
+
+        internal fun updateTime() {
+            lastRequestedTime = System.currentTimeMillis()
+        }
     }
 
     private val memoryCache: LruCache<String, Bitmap> = object : LruCache<String, Bitmap>(
@@ -35,6 +40,32 @@ object BitmapCache {
         }
     }
 
+    private val pendingRequests = HashMap<String/*url*/, PendingEntry>()
+
+    private val methodGetRealCall = Class.forName("okhttp3.RealCall\$AsyncCall")
+        .getDeclaredMethod("get").apply {
+            isAccessible = true
+        }
+
+    private fun Runnable.getLastRequestedTime(): Long? {
+        val call = (methodGetRealCall.invoke(this) as? Call) ?: return null
+        val url  = call.request().url().toString()
+        return synchronized(pendingRequests) {
+            pendingRequests[url]?.lastRequestedTime
+        }
+    }
+
+    private val priorityBlockingQueue = PriorityBlockingQueue<Runnable>(1000, Comparator<Runnable> { r1, r2 ->
+        val time1 = r1.getLastRequestedTime()
+        val time2 = r2.getLastRequestedTime()
+
+        if (time1 != null && time2 != null) {
+            time2.compareTo(time1) // Descending order
+        } else {
+            -1
+        }
+    })
+
     private val httpClient = OkHttpClient.Builder().dispatcher(
         Dispatcher(
             ThreadPoolExecutor(
@@ -42,12 +73,13 @@ object BitmapCache {
                 10,
                 1,
                 TimeUnit.MINUTES,
-                LinkedBlockingLifo<Runnable>()
+                priorityBlockingQueue
             )
-        )
+        ).apply {
+            maxRequests = 1000
+            maxRequestsPerHost = 1000
+        }
     ).build()
-
-    private val pendingRequests = HashMap<String/*url*/, PendingEntry>()
 
     /**
      * @return `true`: has cache
@@ -65,6 +97,7 @@ object BitmapCache {
                 }
             }
             pendingEntry.liveBitmaps += liveBitmap
+            pendingEntry.updateTime()
 
             if (isNewRequest) { // New request
                 val request = Request.Builder().url(url).build()
