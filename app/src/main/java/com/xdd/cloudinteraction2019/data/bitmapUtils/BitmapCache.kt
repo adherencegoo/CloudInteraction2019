@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 object BitmapCache {
     class PendingEntry {
         val liveBitmaps = CopyOnWriteArraySet<MutableLiveData<Bitmap>>()
+        lateinit var httpCall: Call
     }
 
     private val memoryCache: LruCache<String, Bitmap> = object : LruCache<String, Bitmap>(
@@ -68,7 +69,9 @@ object BitmapCache {
 
             if (isNewRequest) { // New request
                 val request = Request.Builder().url(url).build()
-                httpClient.newCall(request).enqueue(object : Callback {
+                httpClient.newCall(request).also {
+                    pendingEntry.httpCall = it
+                }.enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         onNewBitmapLoaded(url, null)
                     }
@@ -112,4 +115,10 @@ object BitmapCache {
 
     private fun loadFromCache(url: String): Bitmap? =
         memoryCache[url]?.takeUnless(Bitmap::isRecycled)
+
+    fun cancelRequest(url: String) {
+        synchronized(pendingRequests) {
+            pendingRequests.remove(url)
+        }?.httpCall?.cancel()
+    }
 }

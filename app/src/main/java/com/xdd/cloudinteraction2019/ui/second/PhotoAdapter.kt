@@ -12,7 +12,9 @@ import com.xdd.cloudinteraction2019.databinding.PhotoCellBinding
 class PhotoAdapter(private val viewModel: SecondViewModel) :
     PagedListAdapter<Photo, PhotoAdapter.ViewHolder>(Photo.diffCallback) {
     class ViewHolder(internal val cellBinding: PhotoCellBinding) :
-        RecyclerView.ViewHolder(cellBinding.root)
+        RecyclerView.ViewHolder(cellBinding.root) {
+        internal var lastRequestedUrl: String? = null
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -31,7 +33,16 @@ class PhotoAdapter(private val viewModel: SecondViewModel) :
 
             val liveBitmap = viewModel.getLiveBitmapRequest(photo.url)
             holder.cellBinding.liveBitmap = liveBitmap
-            BitmapCache.requestBitmap(photo.thumbnailUrl, liveBitmap)
+
+            val newUrl = photo.thumbnailUrl
+            // Cancel old request on this ViewHolder
+            holder.lastRequestedUrl?.takeIf { it != newUrl }?.let {
+                BitmapCache.cancelRequest(it)
+            }
+
+            // Send new request on this ViewHolder
+            BitmapCache.requestBitmap(newUrl, liveBitmap)
+            holder.lastRequestedUrl = newUrl
         }
     }
 }
