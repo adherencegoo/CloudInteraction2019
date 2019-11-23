@@ -1,6 +1,5 @@
 package com.xdd.cloudinteraction2019.ui.second
 
-import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,7 +7,6 @@ import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.xdd.cloudinteraction2019.data.PhotoDataSource
 import com.xdd.cloudinteraction2019.data.model.Photo
-import java.util.*
 import java.util.concurrent.Executors
 
 class SecondViewModel : ViewModel() {
@@ -27,11 +25,4 @@ class SecondViewModel : ViewModel() {
         PhotoDataSource.Factory(_liveLoading),
         pagedListConfig
     ).setFetchExecutor(Executors.newFixedThreadPool(5)).build()
-
-    /**
-     * key: url
-     * */
-    private val liveBitmapRequests = HashMap<String, MutableLiveData<Bitmap>>()
-
-    fun getLiveBitmapRequest(url: String) = liveBitmapRequests.getOrPut(url) { MutableLiveData() }
 }

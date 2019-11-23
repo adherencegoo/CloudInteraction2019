@@ -38,7 +38,7 @@ class SecondFragment : Fragment() {
         val viewModel = ViewModelProviders.of(this).get(SecondViewModel::class.java)
 
         fragmentBinding.viewModel = viewModel
-        fragmentBinding.photoRecycler.adapter = PhotoAdapter(viewModel)
+        fragmentBinding.photoRecycler.adapter = PhotoAdapter()
 
         viewModel.livePhotos.observe(this, Observer<PagedList<Photo>> {
             (fragmentBinding.photoRecycler.adapter as PhotoAdapter).submitList(it)
